@@ -91,3 +91,62 @@ Soluciones:
 - O reinicia el contenedor afectado:
 
 docker restart <nombre_contenedor>
+
+# 🧪 Guía de Pruebas y Cobertura (Code Coverage)
+
+Este documento detalla cómo ejecutar las pruebas unitarias y de integración, así como generar el reporte visual de cobertura de código para validar la calidad del software.
+
+---
+
+## 📋 1. Requisitos Previos
+
+A diferencia de la ejecución con Docker, para correr las pruebas de código fuente se requiere:
+* .NET 8 SDK instalado.
+* Herramienta de Reportes (se instala en el paso 3).
+
+---
+
+## 🚀 2. Ejecución Rápida de Pruebas
+
+Para verificar que toda la lógica de negocio y las integraciones funcionan correctamente, abra una terminal en la raíz del proyecto y ejecute:
+
+dotnet test
+
+---
+
+## 📊 3. Generar Reporte de Cobertura (Code Coverage)
+
+Para visualizar qué porcentaje del código está cubierto por pruebas, siga estos pasos:
+
+Resultado esperado:
+
+Passed!
+
+
+Paso A: Ejecutar Tests recolectando datos
+
+Este comando ejecuta las pruebas y crea un archivo XML con las métricas de cobertura.
+
+PowerShell:
+
+dotnet test --collect:"XPlat Code Coverage"
+
+Paso B: Instalar Generador de Reportes
+
+Para convertir ese archivo XML en un reporte HTML navegable, instale ReportGenerator:
+
+dotnet tool install -g dotnet-reportgenerator-globaltool
+
+Paso C: Generar Reporte HTML
+
+Ejecute este comando para generar el informe visual:
+
+reportgenerator -reports:"./TestResults/**/coverage.cobertura.xml" -targetdir:"coveragereport" -reporttypes:Html
+
+Paso D: Abrir el Reporte
+
+El reporte quedará en:
+
+coveragereport/index.html
+
+Ábralo con doble clic desde su explorador de archivos.
