@@ -1,73 +1,88 @@
-🚀 Guía de Ejecución Rápida - CCS Tracking System
+🚀 Guía de Ejecución Rápida – CCS Tracking System
 
-Este documento detalla los pasos para desplegar, validar y probar la carga de la solución de rastreo vehicular.
+Esta guía describe cómo desplegar, verificar y realizar pruebas de carga sobre la solución de rastreo vehicular CCS Tracking System.
 
 📋 1. Requisitos Previos
 
-Solo se requiere tener instalado:
+Solo necesitas tener instalado:
 
-Docker Desktop (Debe estar corriendo).
+-Docker Desktop (debe estar corriendo).
 
-Git (Para clonar el repositorio).
+-Git (para clonar el repositorio).
 
-(Opcional) PowerShell o Terminal Bash.
+-PowerShell o Terminal Bash (opcional).
 
-Nota: No es necesario tener instalado .NET 8 ni bases de datos. Todo corre dentro de contenedores.
+Nota: No se requiere instalar .NET 8 ni bases de datos.
+Toda la arquitectura corre dentro de contenedores Docker.
 
 🛠️ 2. Despliegue de la Solución
 
-Abra una terminal en la carpeta raíz del proyecto.
+Abre una terminal en la carpeta raíz del proyecto.
 
-Ejecute el siguiente comando para construir y levantar toda la arquitectura:
+Ejecuta:
 
 docker-compose up --build -d
 
 
-Espere aproximadamente 30 segundos para que todos los servicios (especialmente RabbitMQ y la Base de Datos) inicien correctamente.
+Espera ~30 segundos para que todos los servicios inicien correctamente.
 
-Verifique que los 5 contenedores estén activos:
+Verifica que los 5 contenedores estén activos:
 
 docker ps
 
 
-Debe ver:
-ccs_ingestion, ccs_rules, ccs_notifications, ccs_rabbitmq, ccs_postgres.
+Debes ver estos contenedores:
+
+ccs_ingestion
+
+ccs_rules
+
+ccs_notifications
+
+ccs_rabbitmq
+
+ccs_postgres
 
 ✅ 3. Verificación Funcional
 
-Abra su navegador y acceda a las siguientes interfaces para confirmar que el sistema está operativo:
+Abre tu navegador y accede a:
 
-Documentación API (Swagger):
+📚 Documentación API (Swagger)
+
 👉 http://localhost:8080/swagger
 
-(Aquí puede probar los endpoints manualmente si lo desea).
+Aquí puedes probar los endpoints manualmente.
 
-Panel de Mensajería (RabbitMQ):
+📨 Panel de Mensajería (RabbitMQ)
+
 👉 http://localhost:15672
 
+Credenciales:
+
 Usuario: guest
+
 Contraseña: guest
 
 ⚡ 4. Prueba de Carga (Stress Test)
 
-Para demostrar que el sistema soporta +500 peticiones por segundo, se incluye un script de prueba automatizado con k6.
+El proyecto incluye un script automatizado con k6 para demostrar soporte de +500 peticiones por segundo.
 
 🅰️ Paso A: Preparar Datos (Crear Vehículo)
 
-Para generar alertas reales durante la prueba:
+Abre Swagger → http://localhost:8080/swagger
 
-Vaya a Swagger → http://localhost:8080/swagger
+Crear Dueño
 
-Ejecute el endpoint:
+Endpoint: POST /api/owners
 
-1. Crear Dueño
+Clic en Try it out → Execute
 
-POST /api/owners → Try it out → Execute
-(Crea el Dueño con ID = 1)
+Crea el dueño con ID = 1.
 
-2. Crear Vehículo
+Crear Vehículo
 
-POST /api/vehicles
+Endpoint: POST /api/vehicles
+
 Body:
 
 {
@@ -76,11 +91,13 @@ Body:
   "ownerId": 1
 }
 
-3. Crear Regla de Velocidad
 
-POST /api/vehicles/{plate}/rules
+Crear Regla de Velocidad
+
+Endpoint: POST /api/vehicles/{plate}/rules
 
 Plate: STRESS-TEST
+
 Body:
 
 {
@@ -88,25 +105,24 @@ Body:
   "threshold": "10"
 }
 
-4. Recargar Motor de Reglas
 
-Ejecute:
+Recargar Motor de Reglas
 
 docker restart ccs_rules
 
 🅱️ Paso B: Ejecutar el Ataque
 
-Asegúrese de estar en la carpeta donde está el archivo stress-test.js.
+Ubícate en la carpeta donde está el archivo stress-test.js.
 
-En Windows (PowerShell):
+🖥️ Windows (PowerShell)
 Get-Content stress-test.js | docker run --rm -i --add-host=host.docker.internal:host-gateway grafana/k6 run -
 
-En Mac/Linux:
+🐧 Mac / Linux
 docker run --rm -i --add-host=host.docker.internal:host-gateway grafana/k6 run - < stress-test.js
 
 🎯 Resultados Esperados
 
-Al finalizar la prueba, verá algo similar a:
+Al finalizar la prueba deberías ver algo similar a:
 
 http_reqs: ~600/s
 
@@ -119,13 +135,18 @@ Para detener la solución y liberar recursos:
 docker-compose down
 
 🆘 Solución de Problemas Comunes
-⚠️ Error: "Ports are not available"
+⚠️ "Ports are not available"
 
-Asegúrese de no tener otro servicio usando los puertos 8080 o 5432.
+Otro servicio está usando los puertos 8080 o 5432.
+Ciérralo o cambia los puertos en docker-compose.yml.
 
-⚠️ Error: "Connection refused" en los logs
+⚠️ "Connection refused" en los logs
 
 RabbitMQ puede tardar en iniciar.
-Espere un minuto o reinicie el servicio afectado:
+Soluciones:
+
+Espera 1 minuto.
+
+O reinicia el contenedor afectado:
 
 docker restart <nombre_contenedor>
