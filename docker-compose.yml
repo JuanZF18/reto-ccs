@@ -1,0 +1,93 @@
+services:
+  # --- INFRAESTRUCTURA ---
+  
+  postgres:
+    image: postgres:15-alpine
+    container_name: ccs_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: ccs_tracking
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./.docker/postgres-init:/docker-entrypoint-initdb.d
+    networks:
+      - ccs_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: ccs_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"   # Puerto de mensajería
+      - "15672:15672" # Panel de administración Web
+    networks:
+      - ccs_net
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --- MICROSERVICIOS ---
+
+  ingestion-api:
+    build:
+      context: .
+      dockerfile: CCS.IngestionApi/Dockerfile.dockerfile
+    container_name: ccs_ingestion
+    ports:
+      - "8080:8080" # Puerto externo para recibir peticiones
+    environment:
+      # Sobrescribimos localhost por los nombres de los contenedores
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=ccs_tracking;Username=postgres;Password=admin123
+      - RabbitMq__Host=rabbitmq
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - ccs_net
+
+  rules-engine:
+    build:
+      context: .
+      dockerfile: CCS.RulesEngine/Dockerfile.dockerfile
+    container_name: ccs_rules
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=ccs_tracking;Username=postgres;Password=admin123
+      - RabbitMq__Host=rabbitmq
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - ccs_net
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: CCS.NotificationService/Dockerfile.dockerfile
+    container_name: ccs_notifications
+    environment:
+      - RabbitMq__Host=rabbitmq
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - ccs_net
+
+networks:
+  ccs_net:
+    driver: bridge

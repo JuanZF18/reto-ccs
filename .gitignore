@@ -1,0 +1,17 @@
+## --- .NET Core Build Folders (BASURA) ---
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+
+## --- Test Results & Coverage
+TestResults/
+CoverageReport/
+*.cobertura.xml
+*.trx
+*.html
+
+## --- Archivos de Sistema ---
+.DS_Store
+Thumbs.db
