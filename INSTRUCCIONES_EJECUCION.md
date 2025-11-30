@@ -102,24 +102,16 @@ docker restart <nombre_contenedor>
 # 🧪 7. Validación de Reglas de Negocio
 ------------------------------------------------------------
 
-Abrir Swagger → POST /api/telemetry → Try it out → Enviar JSON → Revisar logs de ccs_notifications.
+Abrir Swagger → POST /api/telemetry → Try it out → Enviar JSON → Revisar logs del contenedor ccs_notifications en docker.
+
+Swagger:  
+http://localhost:8080/index.html
+
+Para probar todos estos casos simplemente nos ubicamos en el endpoint api/telemetry y pegamos en el body cada uno de los siguientes JSON.
 
 ------------------------------------------------------------
-Caso 1: Prueba de Estrés (Stress Test Check)
+Caso 1: Prueba de Estrés (Stress Test Check) 500+ por segundo durante 2min.
 ------------------------------------------------------------
-
-Vehículo: STRESS-TEST  
-Regla: límite 10 km/h  
-Escenario: 50 km/h
-
-{
-  "plate": "STRESS-TEST",
-  "speed": 50,
-  "lat": 6.2,
-  "lon": -75.5,
-  "heading": 0,
-  "metadata": {}
-}
 
 ------------------------------------------------------------
 Caso 2: Exceso de Velocidad (MaxSpeed)
