@@ -53,7 +53,7 @@ ccs_postgres
 ------------------------------------------------------------
 
 Swagger:  
-http://localhost:8080/swagger
+http://localhost:8080/index.html
 
 RabbitMQ:  
 http://localhost:15672  
