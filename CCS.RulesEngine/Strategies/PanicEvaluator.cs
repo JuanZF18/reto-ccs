@@ -45,7 +45,7 @@ public class PanicEvaluator : IRuleEvaluator
         }
 
         // ---------------------------------------------------------
-        // 3. Ayuda de Seguridad (Opcional, si la App lo soporta)
+        // 3. Ayuda de Seguridad
         // ---------------------------------------------------------
         if (meta.TryGetValue(TelemetryKeys.SecurityHelp, out var security) && IsTrue(security))
         {
@@ -54,7 +54,7 @@ public class PanicEvaluator : IRuleEvaluator
         }
 
         // ---------------------------------------------------------
-        // 4. Accidente Detectado (Vibración / Choque)
+        // 4. Accidente Detectado
         // ---------------------------------------------------------
         if (meta.TryGetValue(TelemetryKeys.CargoVibration, out var vib))
         {
