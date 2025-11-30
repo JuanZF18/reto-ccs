@@ -26,10 +26,10 @@ public class AlertConsumer : IConsumer<AlertTriggered>
 {
     public Task Consume(ConsumeContext<AlertTriggered> context)
     {
-        //var alert = context.Message;
-        //Console.BackgroundColor = ConsoleColor.DarkGreen;
-        //Console.WriteLine($"[EMAIL ENVIADO] Propietario de {alert.VehiclePlate} notificado: {alert.RuleDescription}");
-        //Console.ResetColor();
+        var alert = context.Message;
+        Console.BackgroundColor = ConsoleColor.DarkGreen;
+        Console.WriteLine($"[EMAIL ENVIADO] Propietario de {alert.VehiclePlate} notificado: {alert.RuleDescription}");
+        Console.ResetColor();
         return Task.CompletedTask;
     }
-}
+}   

@@ -13,6 +13,7 @@ builder.Services.AddSingleton<IRuleEvaluator, PanicEvaluator>();
 builder.Services.AddSingleton<IRuleEvaluator, TemperatureEvaluator>();
 builder.Services.AddSingleton<IRuleEvaluator, StopEvaluator>();
 builder.Services.AddSingleton<IRuleEvaluator, ScheduleEvaluator>();
+builder.Services.AddSingleton<IRuleEvaluator, DoorSensorEvaluator>();
 
 // 2. Configurar MassTransit
 builder.Services.AddMassTransit(x =>

@@ -39,7 +39,10 @@ public class TelemetryConsumer : IConsumer<TelemetryReceived>
         foreach (var alert in alerts)
         {
             await context.Publish(alert);
-            //Console.WriteLine($"[ALERTA GENERADA] {alert.VehiclePlate}: {alert.RuleDescription}");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"[ALERTA GENERADA] {alert.VehiclePlate}: {alert.RuleDescription}");
+            Console.ResetColor();
+
         }
     }
 }

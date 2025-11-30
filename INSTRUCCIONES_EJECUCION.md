@@ -92,6 +92,187 @@ Soluciones:
 
 docker restart <nombre_contenedor>
 
+
+## 🧪 5. Validación de Reglas de Negocio (Paso a Paso)
+
+El sistema ya ha sido inicializado automáticamente con una flota de 8 vehículos de prueba gracias al script de inicio (`init.sql`). Cada vehículo está configurado para validar una de las reglas de negocio requeridas.
+
+**Instrucciones:**
+1. Abra Swagger: [http://localhost:8080/swagger](http://localhost:8080/swagger)
+2. Busque el endpoint **`POST /api/telemetry`**.
+3. Haga clic en **Try it out**.
+4. Copie el JSON de cada caso, péguelo en el campo "Request body" y haga clic en **Execute**.
+5. Verifique el código **202 Accepted** y revise los logs del contenedor `ccs_notifications` para ver la alerta.
+
+---
+
+### 🏎️ Caso 1: Prueba de Estrés (Stress Test Check)
+
+- **Vehículo:** `STRESS-TEST`
+
+- **Regla:** Límite de velocidad muy bajo (**10 km/h**) para facilitar pruebas de carga.
+
+- **Escenario:** El vehículo va a 50 km/h.
+
+```json
+{
+  "plate": "STRESS-TEST",
+  "speed": 50,
+  "lat": 6.2, "lon": -75.5, "heading": 0,
+  "metadata": {}
+}
+
+### 🛑 Caso 2: Exceso de Velocidad (MaxSpeed)
+
+-   **Vehículo:** `SPEED-TRUCK`
+
+-   **Regla:** Límite máximo de **80 km/h**.
+
+-   **Escenario:** El camión reporta una velocidad de **100 km/h**.
+
+`{
+  "plate": "SPEED-TRUCK",
+  "speed": 100,
+  "lat": 6.2,
+  "lon": -75.5,
+  "heading": 0,
+  "metadata": {}
+}`
+
+**Resultado en Logs:** `"Velocidad 100 supera límite de 80"`.
+
+* * * * *
+
+### ❄️ Caso 3: Temperatura de Carga (CargoTemperature)
+
+-   **Vehículo:** `FROZEN-01`
+
+-   **Regla:** Temperatura máxima permitida de **-5°C**.
+
+-   **Escenario:** La temperatura sube a **2.0°C** (riesgo de descongelamiento).
+
+`{
+  "plate": "FROZEN-01",
+  "speed": 40,
+  "lat": 6.2,
+  "lon": -75.5,
+  "heading": 0,
+  "metadata": {
+    "cargoTemp": 2.0
+  }
+}`
+
+**Resultado en Logs:** `"Temperatura 2°C excede límite de -5°C"`.
+
+* * * * *
+
+### 🚨 Caso 4: Botón de Pánico (PanicButton)
+
+-   **Vehículo:** `TAXI-SOS`
+
+-   **Regla:** Generar alerta crítica si el botón es activado.
+
+-   **Escenario:** El conductor presiona el botón de pánico.
+
+`{
+  "plate": "TAXI-SOS",
+  "speed": 0,
+  "lat": 6.2,
+  "lon": -75.5,
+  "heading": 0,
+  "metadata": {
+    "panic": true
+  }
+}`
+
+**Resultado en Logs:** `"PANIC BUTTON ACTIVATED"`.
+
+* * * * *
+
+### 🅿️ Caso 5: Detención No Planeada (UnplannedStop)
+
+-   **Vehículo:** `MONEY-TRUCK`
+
+-   **Regla:** Alerta si la velocidad baja a **0 km/h** en ruta.
+
+-   **Escenario:** El camión de valores se detiene inesperadamente.
+
+`{
+  "plate": "MONEY-TRUCK",
+  "speed": 0,
+  "lat": 6.2,
+  "lon": -75.5,
+  "heading": 0,
+  "metadata": {}
+}`
+
+**Resultado en Logs:** `"Detención no planeada detectada"`.
+
+* * * * *
+
+### 🕒 Caso 6: Horario Restringido (RestrictedSchedule)
+
+-   **Vehículo:** `MOTO-NIGHT`
+
+-   **Regla:** Prohibido circular entre **00:00 y 23:59** (restricción total para pruebas).
+
+-   **Escenario:** La motocicleta reporta movimiento.
+
+`{
+  "plate": "MOTO-NIGHT",
+  "speed": 30,
+  "lat": 6.2,
+  "lon": -75.5,
+  "heading": 0,
+  "metadata": {}
+}`
+
+**Resultado en Logs:** `"Movimiento en horario no permitido"`.
+
+* * * * *
+
+### 🗺️ Caso 7: Geocerca (Geofence)
+
+-   **Vehículo:** `ZONE-CAR`
+
+-   **Regla:** Debe permanecer dentro de un radio de **500m** del punto (6.2, -75.5).
+
+-   **Escenario:** El vehículo se aleja (latitud 7.0 → fuera de zona).
+
+`{
+  "plate": "ZONE-CAR",
+  "speed": 40,
+  "lat": 7.0,
+  "lon": -75.5,
+  "heading": 0,
+  "metadata": {}
+}`
+
+**Resultado en Logs:** `"Vehículo fuera de geocerca..."`.
+
+* * * * *
+
+### 🚪 Caso 8: Sensor de Puerta (DoorSensor)
+
+-   **Vehículo:** `DOOR-VAN`
+
+-   **Regla:** La puerta trasera **no puede abrirse mientras hay movimiento**.
+
+-   **Escenario:** El vehículo reporta `doorOpen: true` a **50 km/h**.
+
+`{
+  "plate": "DOOR-VAN",
+  "speed": 50,
+  "lat": 6.2,
+  "lon": -75.5,
+  "heading": 0,
+  "metadata": {
+    "doorOpen": true
+  }
+}`
+
+**Resultado en Logs:** `"Puerta trasera abierta detectada con vehículo en movimiento"`
+
 # 🧪 Guía de Pruebas y Cobertura (Code Coverage)
 
 Este documento detalla cómo ejecutar las pruebas unitarias y de integración, así como generar el reporte visual de cobertura de código para validar la calidad del software.
