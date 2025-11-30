@@ -156,7 +156,7 @@ Escenario: 2°C
   "lon": -75.5,
   "heading": 0,
   "metadata": {
-    "cargoTemp": 2.0
+    "cargo_temp": 2.0
   }
 }
 
@@ -177,7 +177,7 @@ Regla: alarma si panic=true
   "lon": -75.5,
   "heading": 0,
   "metadata": {
-    "panic": true
+    "panic_btn": true
   }
 }
 
