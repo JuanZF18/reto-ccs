@@ -258,6 +258,24 @@ Log esperado:
 “Puerta trasera abierta detectada con vehículo en movimiento”
 
 ------------------------------------------------------------
+Caso 9: Choque Detectado (Vibración > 10G)
+------------------------------------------------------------
+
+Vehículo: CRASH-CAM
+Regla: Detección automática de accidente por fuerza G (Vibración).
+Escenario: El sensor detecta un impacto de **45.5 G** (muy superior al límite de 10.0) y adjunta evidencia de video.
+
+{
+  "plate": "CRASH-CAM",
+  "speed": 0,
+  "lat": 6.2, "lon": -75.5, "heading": 0,
+  "metadata": {
+      "cargo_vib": 45.5,
+      "videoUrl": "[https://cdn.ccs.com/evidence/crash_2023.mp4](https://cdn.ccs.com/evidence/crash_2023.mp4)"
+  }
+}
+
+------------------------------------------------------------
 # 🧪 Guía de Pruebas y Cobertura (Code Coverage)
 ------------------------------------------------------------
 
