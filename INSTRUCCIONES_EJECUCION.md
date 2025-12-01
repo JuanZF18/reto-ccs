@@ -318,18 +318,27 @@ Requisitos:
 Ejecutar pruebas:
 
 dotnet test
+```bash
+dotnet test
+```
 
 Generar datos de cobertura:
 
+```bash
 dotnet test --collect:"XPlat Code Coverage"
+```
 
 Instalar ReportGenerator:
 
+```bash
 dotnet tool install -g dotnet-reportgenerator-globaltool
+```
 
 Generar reporte HTML:
 
+```bash
 reportgenerator -reports:"./TestResults/**/coverage.cobertura.xml" -targetdir:"coveragereport" -reporttypes:Html
+```
 
 Abrir archivo:
 
