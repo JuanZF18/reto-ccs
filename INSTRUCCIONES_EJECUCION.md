@@ -32,21 +32,37 @@ Toda la arquitectura corre dentro de contenedores Docker.
 # 🛠️ 2. Despliegue de la Solución
 ------------------------------------------------------------
 
-Ejecuta en la raíz del proyecto:
+### Despliegue rápido (Docker)
 
+1. Clonar el repositorio y moverse a la raíz del proyecto:
+```bash
+git clone https://github.com/JuanZF18/reto-ccs
+cd reto-ccs
+```
+
+2. Levantar los contenedores en segundo plano (desde la raíz donde está docker-compose.yml):
+```bash
 docker-compose up --build -d
+```
 
-Verifica los contenedores:
-
+3. Verificar que los contenedores estén corriendo:
+```bash
 docker ps
+```
 
-Debe aparecer:
+4. Contenedores esperados (deben aparecer en la lista):
+```
+ccs_ingestion
+ccs_rules
+ccs_notifications
+ccs_rabbitmq
+ccs_postgres
+```
 
-ccs_ingestion  
-ccs_rules  
-ccs_notifications  
-ccs_rabbitmq  
-ccs_postgres  
+Notas:
+- Si algún contenedor no arranca, ver logs con `docker-compose logs <nombre_contenedor>` o `docker logs <container_id>`.
+- Para detener y limpiar: `docker-compose down`.
+- Asegúrate de tener Docker Desktop corriendo antes de ejecutar los comandos.
 
 ------------------------------------------------------------
 # ✅ 3. Verificación Funcional
@@ -68,13 +84,27 @@ La base de datos ya viene inicializada automáticamente mediante `.docker/postgr
 
 Ubícate en la carpeta con el archivo stress-test.js.
 
+Ejecute el siguiente comando dependiendo del sistema operativo.
+
 Windows:
 
-Get-Content stress-test.js | docker run --rm -i --add-host=host.docker.internal:host-gateway grafana/k6 run -
+Ejecutar desde la carpeta que contiene stress-test.js.
 
-Mac / Linux:
+PowerShell (recomendado en Windows):
+```powershell
+Get-Content -Raw .\stress-test.js |
+  docker run --rm -i --add-host=host.docker.internal:host-gateway grafana/k6 run -
+```
 
+CMD (Windows):
+```cmd
+type stress-test.js | docker run --rm -i --add-host=host.docker.internal:host-gateway grafana/k6 run -
+```
+
+macOS / Linux / WSL:
+```bash
 docker run --rm -i --add-host=host.docker.internal:host-gateway grafana/k6 run - < stress-test.js
+```
 
 Resultados esperados:  
 http_reqs: ~600/s  
@@ -109,18 +139,17 @@ http://localhost:8080/index.html
 
 Para probar todos estos casos simplemente nos ubicamos en el endpoint api/telemetry y pegamos en el body cada uno de los siguientes JSON.
 
-------------------------------------------------------------
-Caso 1: Prueba de Estrés (Stress Test Check) 500+ por segundo durante 2min.
-------------------------------------------------------------
+### Caso 1: Prueba de Estrés (Stress Test Check)
+- Descripción: 500+ por segundo durante 2min.
 
-------------------------------------------------------------
-Caso 2: Exceso de Velocidad (MaxSpeed)
-------------------------------------------------------------
+---
 
-Vehículo: SPEED-TRUCK  
-Regla: máximo 80 km/h  
-Escenario: 100 km/h
+### Caso 2: Exceso de Velocidad (MaxSpeed)
+- Vehículo: SPEED-TRUCK  
+- Regla: máximo 80 km/h  
+- Escenario: 100 km/h
 
+```json
 {
   "plate": "SPEED-TRUCK",
   "speed": 100,
@@ -129,18 +158,18 @@ Escenario: 100 km/h
   "heading": 0,
   "metadata": {}
 }
+```
 
-Log esperado:  
-“Velocidad 100 supera límite de 80”
+Log esperado: “Velocidad 100 supera límite de 80”
 
-------------------------------------------------------------
-Caso 3: Temperatura de Carga (CargoTemperature)
-------------------------------------------------------------
+---
 
-Vehículo: FROZEN-01  
-Regla: máximo -5°C  
-Escenario: 2°C
+### Caso 3: Temperatura de Carga (CargoTemperature)
+- Vehículo: FROZEN-01  
+- Regla: máximo -5°C  
+- Escenario: 2°C
 
+```json
 {
   "plate": "FROZEN-01",
   "speed": 40,
@@ -151,17 +180,17 @@ Escenario: 2°C
     "cargo_temp": 2.0
   }
 }
+```
 
-Log esperado:  
-“Temperatura 2°C excede límite de -5°C”
+Log esperado: “Temperatura 2°C excede límite de -5°C”
 
-------------------------------------------------------------
-Caso 4: Botón de Pánico (PanicButton)
-------------------------------------------------------------
+---
 
-Vehículo: TAXI-SOS  
-Regla: alarma si panic=true
+### Caso 4: Botón de Pánico (PanicButton)
+- Vehículo: TAXI-SOS  
+- Regla: alarma si panic=true
 
+```json
 {
   "plate": "TAXI-SOS",
   "speed": 0,
@@ -172,17 +201,17 @@ Regla: alarma si panic=true
     "panic_btn": true
   }
 }
+```
 
-Log esperado:  
-“PANIC BUTTON ACTIVATED”
+Log esperado: “PANIC BUTTON ACTIVATED”
 
-------------------------------------------------------------
-Caso 5: Detención No Planeada (UnplannedStop)
-------------------------------------------------------------
+---
 
-Vehículo: MONEY-TRUCK  
-Escenario: velocidad = 0
+### Caso 5: Detención No Planeada (UnplannedStop)
+- Vehículo: MONEY-TRUCK  
+- Escenario: velocidad = 0
 
+```json
 {
   "plate": "MONEY-TRUCK",
   "speed": 0,
@@ -191,18 +220,18 @@ Escenario: velocidad = 0
   "heading": 0,
   "metadata": {}
 }
+```
 
-Log esperado:  
-“Detención no planeada detectada”
+Log esperado: “Detención no planeada detectada”
 
-------------------------------------------------------------
-Caso 6: Horario Restringido (RestrictedSchedule)
-------------------------------------------------------------
+---
 
-Vehículo: MOTO-NIGHT  
-Regla: prohibido 00:00–23:59  
-Escenario: movimiento
+### Caso 6: Horario Restringido (RestrictedSchedule)
+- Vehículo: MOTO-NIGHT  
+- Regla: prohibido 00:00–23:59  
+- Escenario: movimiento
 
+```json
 {
   "plate": "MOTO-NIGHT",
   "speed": 30,
@@ -211,18 +240,18 @@ Escenario: movimiento
   "heading": 0,
   "metadata": {}
 }
+```
 
-Log esperado:  
-“Movimiento en horario no permitido”
+Log esperado: “Movimiento en horario no permitido”
 
-------------------------------------------------------------
-Caso 7: Geocerca (Geofence)
-------------------------------------------------------------
+---
 
-Vehículo: ZONE-CAR  
-Regla: radio 500m desde (6.2, -75.5)  
-Escenario: lat 7.0
+### Caso 7: Geocerca (Geofence)
+- Vehículo: ZONE-CAR  
+- Regla: radio 500m desde (6.2, -75.5)  
+- Escenario: lat 7.0
 
+```json
 {
   "plate": "ZONE-CAR",
   "speed": 40,
@@ -231,18 +260,18 @@ Escenario: lat 7.0
   "heading": 0,
   "metadata": {}
 }
+```
 
-Log esperado:  
-“Vehículo fuera de geocerca…”
+Log esperado: “Vehículo fuera de geocerca…”
 
-------------------------------------------------------------
-Caso 8: Sensor de Puerta (DoorSensor)
-------------------------------------------------------------
+---
 
-Vehículo: DOOR-VAN  
-Regla: puerta no puede abrirse si hay movimiento  
-Escenario: doorOpen=true y speed=50
+### Caso 8: Sensor de Puerta (DoorSensor)
+- Vehículo: DOOR-VAN  
+- Regla: puerta no puede abrirse si hay movimiento  
+- Escenario: doorOpen=true y speed=50
 
+```json
 {
   "plate": "DOOR-VAN",
   "speed": 50,
@@ -253,18 +282,18 @@ Escenario: doorOpen=true y speed=50
     "doorOpen": true
   }
 }
+```
 
-Log esperado:  
-“Puerta trasera abierta detectada con vehículo en movimiento”
+Log esperado: “Puerta trasera abierta detectada con vehículo en movimiento”
 
-------------------------------------------------------------
-Caso 9: Choque Detectado (Vibración > 10G)
-------------------------------------------------------------
+---
 
-Vehículo: CRASH-CAM
-Regla: Detección automática de accidente por fuerza G (Vibración).
-Escenario: El sensor detecta un impacto de **45.5 G** (muy superior al límite de 10.0) y adjunta evidencia de video.
+### Caso 9: Choque Detectado (Vibración > 10G)
+- Vehículo: CRASH-CAM  
+- Regla: Detección automática de accidente por fuerza G (Vibración).  
+- Escenario: El sensor detecta un impacto de **45.5 G** (muy superior al límite de 10.0) y adjunta evidencia de video.
 
+```json
 {
   "plate": "CRASH-CAM",
   "speed": 0,
@@ -274,6 +303,9 @@ Escenario: El sensor detecta un impacto de **45.5 G** (muy superior al límite d
       "videoUrl": "[https://cdn.ccs.com/evidence/crash_2023.mp4](https://cdn.ccs.com/evidence/crash_2023.mp4)"
   }
 }
+```
+
+Log esperado: (adjuntar evidencia y revisar alerta generada)
 
 ------------------------------------------------------------
 # 🧪 Guía de Pruebas y Cobertura (Code Coverage)
